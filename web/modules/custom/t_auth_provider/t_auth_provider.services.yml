@@ -1,0 +1,6 @@
+services:
+  authentication.t_auth_provider:
+    class: Drupal\t_auth_provider\Authentication\Provider\TAuthProvider
+    arguments: ['@config.factory', '@entity.manager', '@user.auth']
+    tags:
+      - { name: authentication_provider, provider_id: t_auth_provider, priority: 100, global: FALSE }

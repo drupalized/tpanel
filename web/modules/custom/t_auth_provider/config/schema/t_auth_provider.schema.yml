@@ -1,0 +1,13 @@
+t_auth_provider.settings:
+  type: config_object
+  label: 'TPanel Authentication Provider settings:'
+  mapping:
+    t_auth_provider:
+      type: mapping
+      mapping:
+        allowed_ip_consumers:
+          type: text
+          label: 'Allowed IP addresses'
+        list_type:
+          type: boolean
+          label: 'Type of IP list'
