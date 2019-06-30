@@ -1,0 +1,6 @@
+t_auth_provider.config_form:
+  title: 'T-Auth Provider'
+  route_name: 't_auth_provider.config_form'
+  description: 'Configures the T-Auth Provider module'
+  parent: system.admin_config_system
+  weight: 99

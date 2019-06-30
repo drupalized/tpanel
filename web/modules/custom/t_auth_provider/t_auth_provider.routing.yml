@@ -1,0 +1,9 @@
+t_auth_provider.config_form:
+  path: '/admin/t_auth_provider'
+  defaults:
+    _form: '\Drupal\t_auth_provider\Form\TAuthProviderForm'
+    _title: 'T-Auth Provider Configuration Form'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE

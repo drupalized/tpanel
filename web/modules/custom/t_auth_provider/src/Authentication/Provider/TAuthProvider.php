@@ -76,7 +76,7 @@ class TAuthProvider implements AuthenticationProviderInterface {
    */
   public function applies(Request $request) {
     //if ($request->query->has('key'))
-    return false;
+    return true;
     
   }
 

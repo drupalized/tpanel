@@ -5,3 +5,4 @@ package: Web services
 dependencies: 
   - google_login_handler
 core: 8.x
+configure: t_auth_provider.config_form

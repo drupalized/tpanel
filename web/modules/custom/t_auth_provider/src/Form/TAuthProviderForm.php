@@ -25,13 +25,6 @@ class TAuthProviderForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function getEditableConfigNames() {
-    return [static::SETTINGS];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     //Default settings
     $config = $this->config(static::SETTINGS);
@@ -66,12 +59,19 @@ class TAuthProviderForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FromStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->configFactory->getEditable(static::SETTINGS)
       ->set('t_auth_provider.allowed_ip_consumers', $form_state->getValue('allowed_ip_consumers'))
       ->set('t_auth_provider.list_type', $form_state->getValue('list_type'))
       ->save();
 
-      return parent::submitForm($form, $form_state);
+    return parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getEditableConfigNames() {
+    return [static::SETTINGS];
   }
 }
