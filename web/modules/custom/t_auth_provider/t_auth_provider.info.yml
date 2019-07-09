@@ -2,7 +2,7 @@ name: 'T-Auth Provider'
 type: module
 description: 'Provides a Request Origin Authentication'
 package: Web services
-dependencies: 
+dependencies:
   - google_login_handler
 core: 8.x
 configure: t_auth_provider.config_form

@@ -4,3 +4,17 @@ services:
     arguments: ['@config.factory', '@entity.manager']
     tags:
       - { name: authentication_provider, provider_id: t_auth_provider, priority: 100, global: TRUE }
+ cors.config:
+    enabled: true
+    # Specify allowed headers, like 'x-allowed-header'.
+    allowedHeaders: ['x-access-token']
+    # Specify allowed request methods, specify ['*'] to allow all possible ones.
+    allowedMethods: ['*']
+    # Configure requests allowed from specific origins.
+    allowedOrigins: ['http://localhost']
+    # Sets the Access-Control-Expose-Headers header.
+    exposedHeaders: true
+    # Sets the Access-Control-Max-Age header.
+    maxAge: true
+    # Sets the Access-Control-Allow-Credentials header.
+    supportsCredentials: true

@@ -34,15 +34,8 @@ class TAuthProvider implements AuthenticationProviderInterface {
   protected $entityTypeManager;
 
   /**
-   * User Auth interface.
-   * 
-   * @var \Drupal\user\UserAuth
-   */
-  protected $userAuth;
-
-  /**
    * The JWT Token service.
-   * 
+   *
    * @var \Drupal\google_login_handler\JwtTokenHandlerService
    */
   protected $jwtTokenService;
@@ -66,18 +59,16 @@ class TAuthProvider implements AuthenticationProviderInterface {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('google_login_handler.jwt_token_handler'),
-      $container->get('entity_type.manager'),
-      $container->get('user.auth')
+      $container->get('entity_type.manager')
     );
   }
-  
+
   /**
    * {@inheritdoc}
    */
   public function applies(Request $request) {
-    //if ($request->query->has('key'))
-    return true;
-    
+    $auth = $request->headers->get('x-access-token');
+    return preg_match('/^Bearer .+/', $auth);
   }
 
   /**
@@ -85,42 +76,35 @@ class TAuthProvider implements AuthenticationProviderInterface {
    */
   public function authenticate(Request $request) {
 
-    //$user = $this->entityTypeManager->getStorage('user')->load(2);
-    $user = \Drupal::service('user.auth')->authenticate('admin', 'admin');
-    return user_load($user);
-    //return $user;
+    $config = $this->configFactory->get('t_auth_provider.settings');
+    $allowed_ip_consumers = $config->get('allowed_ip_consumers');
+    // Determine if list of IP is a white list or black list
+    $type = $config->get('list_type');
+    $ips = array_map('trim', explode( "\n", $allowed_ip_consumers));
+    $consumer_ip = $request->getClientIp(TRUE);
 
-    // $config = $this->configFactory->get('t_auth_provider.settings');
-    // $allowed_ip_consumers = $config->get('allowed_ip_consumers');
-    // // Determine if list of IP is a white list or black list
-    // $type = $config->get('list_type');
-    // $ips = array_map('trim', explode( "\n", $allowed_ip_consumers));
-    // $consumer_ip = $request->getClientIp(TRUE);
-
-    // // White list logic
-    // if($type) {
-    //   if (in_array($consumer_ip, $ips)) {
-    //     return $this->entityTypeManager->getStorage('user')->load(1);
-    //   }
-    //   else {
-    //     throw new AccessDeniedHttpException();
-    //     return null;
-    //   }
-    // }
-    // // Black list logic
-    // else {
-    //   if (!in_array($consumer_ip, $ips)) {
-    //     return $this->entityTypeManager->getStorage('user')->load(1);
-    //   }
-    //   else {
-    //     throw new AccessDeniedHttpException();
-    //     return null;
-    //   }
-    // }
+    // White list logic
+    if($type) {
+      if (in_array($consumer_ip, $ips)) {
+        return $this->entityTypeManager->getStorage('user')->load(1);
+      }
+      else {
+        throw new AccessDeniedHttpException();
+      }
+    }
+    // Black list logic
+    else {
+      if (!in_array($consumer_ip, $ips)) {
+        return $this->entityTypeManager->getStorage('user')->load(1);
+      }
+      else {
+        throw new AccessDeniedHttpException();
+      }
+    }
   }
 
   public function cleanup(Request $request) {
-    
+
   }
-  
+
 }
