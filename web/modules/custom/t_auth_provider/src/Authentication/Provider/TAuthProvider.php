@@ -78,15 +78,21 @@ class TAuthProvider implements AuthenticationProviderInterface {
 
     $config = $this->configFactory->get('t_auth_provider.settings');
     $allowed_ip_consumers = $config->get('allowed_ip_consumers');
+
     // Determine if list of IP is a white list or black list
-    $type = $config->get('list_type');
-    $ips = array_map('trim', explode( "\n", $allowed_ip_consumers));
+    $whitelisted = $config->get('list_type');
+    $ip_list = array_map('trim', explode("\n", $allowed_ip_consumers));
     $consumer_ip = $request->getClientIp(TRUE);
+    $token = $request->headers->get('x-access-token');
 
     // White list logic
-    if($type) {
-      if (in_array($consumer_ip, $ips)) {
-        return $this->entityTypeManager->getStorage('user')->load(1);
+    if ($whitelisted) {
+      if (in_array($consumer_ip, $ip_list)) {
+        $user_uuid = $jwtTokenService->validate_request_token($token);
+        if(!$user_uuid) {
+          return null;
+        }
+        return $this->entityTypeManager->getStorage('user')->load($user_uuid);
       }
       else {
         throw new AccessDeniedHttpException();
@@ -95,7 +101,11 @@ class TAuthProvider implements AuthenticationProviderInterface {
     // Black list logic
     else {
       if (!in_array($consumer_ip, $ips)) {
-        return $this->entityTypeManager->getStorage('user')->load(1);
+        $user_uuid = $jwtTokenService->validate_request_token($token);
+        if(!$user_uuid) {
+          return null;
+        }
+        return $this->entityTypeManager->getStorage('user')->load($user_uuid);
       }
       else {
         throw new AccessDeniedHttpException();

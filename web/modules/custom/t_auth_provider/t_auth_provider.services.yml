@@ -11,7 +11,7 @@ services:
     # Specify allowed request methods, specify ['*'] to allow all possible ones.
     allowedMethods: ['*']
     # Configure requests allowed from specific origins.
-    allowedOrigins: ['http://localhost']
+    allowedOrigins: ['http://localhost', 'http://tpanel.local', '*']
     # Sets the Access-Control-Expose-Headers header.
     exposedHeaders: true
     # Sets the Access-Control-Max-Age header.

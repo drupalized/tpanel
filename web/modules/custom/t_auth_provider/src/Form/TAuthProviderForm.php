@@ -36,15 +36,15 @@ class TAuthProviderForm extends ConfigFormBase {
       '#description' => $this->t('Place one IP address per line.')
     ];
 
-    $options = array(0 => t('Blacklist'), 1 => t('Whitelist'));
-    $form['list_type'] = array(
+    $options = [0 => t('Blacklist'), 1 => t('Whitelist')];
+    $form['list_type'] = [
       '#type' => 'radios',
       '#title' => t('Type of IP list'),
       '#default_value' => $config->get('list_type'),
       '#options' => $options,
       '#description' => t('Define in what way the IP list will be used in Authorization logic.'),
       '#required' => TRUE
-    );
+    ];
 
     return parent::buildForm($form, $form_state);
   }
