@@ -51,6 +51,7 @@ class TAuthProvider implements AuthenticationProviderInterface {
   public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager) {
     $this->configFactory = $config_factory;
     $this->entityTypeManager = $entity_type_manager;
+    $this->jwtTokenService = \Drupal::service('google_login_handler.jwt_token_handler');
   }
 
   /**
@@ -88,33 +89,48 @@ class TAuthProvider implements AuthenticationProviderInterface {
     // White list logic
     if ($whitelisted) {
       if (in_array($consumer_ip, $ip_list)) {
-        $user_uuid = $jwtTokenService->validate_request_token($token);
+        $user_uuid = $this->jwtTokenService->validate_request_token($token);
         if(!$user_uuid) {
           return null;
         }
-        return $this->entityTypeManager->getStorage('user')->load($user_uuid);
+        return $this->entityTypeManager->getStorage('user')->load(0);
       }
       else {
         throw new AccessDeniedHttpException();
+        return null;
       }
     }
     // Black list logic
     else {
-      if (!in_array($consumer_ip, $ips)) {
-        $user_uuid = $jwtTokenService->validate_request_token($token);
+      if (!in_array($consumer_ip, $ip_list)) {
+        $user_uuid = $this->jwtTokenService->validate_request_token($token);
         if(!$user_uuid) {
           return null;
         }
-        return $this->entityTypeManager->getStorage('user')->load($user_uuid);
+        return $this->entityTypeManager->getStorage('user')->load(0);
       }
       else {
         throw new AccessDeniedHttpException();
+        return null;
       }
     }
   }
 
   public function cleanup(Request $request) {
 
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function handleException(GetResponseForExceptionEvent $event) {
+    $exception = $event->getException();
+    if($exception instanceof AccessDeniedHttpException) {
+      $event->setException(new UnauthorizedHttpException('Invalid consumer origin.', $exception));
+
+      return true;
+    }
+    return false;
   }
 
 }
