@@ -93,7 +93,7 @@ class TAuthProvider implements AuthenticationProviderInterface {
         if(!$user_uuid) {
           return null;
         }
-        return $this->entityTypeManager->getStorage('user')->load(0);
+        return $this->entityTypeManager->getStorage('user')->load($user_uuid);
       }
       else {
         throw new AccessDeniedHttpException();
@@ -107,7 +107,7 @@ class TAuthProvider implements AuthenticationProviderInterface {
         if(!$user_uuid) {
           return null;
         }
-        return $this->entityTypeManager->getStorage('user')->load(0);
+        return $this->entityTypeManager->getStorage('user')->load($user_uuid);
       }
       else {
         throw new AccessDeniedHttpException();

@@ -30,7 +30,7 @@ class TAuthProviderForm extends ConfigFormBase {
     $config = $this->config(static::SETTINGS);
 
     $form['allowed_ip_consumers'] = [
-      '#type' => 'textfield',
+      '#type' => 'textarea',
       '#title' => $this->t('Allowed IP Consumers:'),
       '#default_value' => $config->get('t_auth_provider.allowed_ip_consumers'),
       '#description' => $this->t('Place one IP address per line.')
