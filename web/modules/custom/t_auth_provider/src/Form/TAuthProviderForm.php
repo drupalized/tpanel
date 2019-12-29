@@ -36,11 +36,18 @@ class TAuthProviderForm extends ConfigFormBase {
       '#description' => $this->t('Place one IP address per line.')
     ];
 
-    $options = [0 => t('Blacklist'), 1 => t('Whitelist')];
+    $options = array(
+      0 => t('Blacklist'),
+      1 => t('Whitelist')
+    );
+
+
+    $list_type_default_value = intval($config->get('t_auth_provider.list_type'));
+
     $form['list_type'] = [
       '#type' => 'radios',
       '#title' => t('Type of IP list'),
-      '#default_value' => $config->get('list_type'),
+      '#default_value' => $list_type_default_value,
       '#options' => $options,
       '#description' => t('Define in what way the IP list will be used in Authorization logic.'),
       '#required' => TRUE

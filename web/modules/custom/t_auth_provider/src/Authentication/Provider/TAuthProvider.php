@@ -60,7 +60,8 @@ class TAuthProvider implements AuthenticationProviderInterface {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('google_login_handler.jwt_token_handler'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('config.factory')
     );
   }
 
@@ -68,8 +69,11 @@ class TAuthProvider implements AuthenticationProviderInterface {
    * {@inheritdoc}
    */
   public function applies(Request $request) {
-    $auth = $request->headers->get('x-access-token');
-    return preg_match('/^Bearer .+/', $auth);
+    $auth = $request->headers->get("Authorization");
+
+    $applies = preg_match('/^Bearer .+/', $auth);
+
+    return $applies;
   }
 
   /**
@@ -78,19 +82,23 @@ class TAuthProvider implements AuthenticationProviderInterface {
   public function authenticate(Request $request) {
 
     $config = $this->configFactory->get('t_auth_provider.settings');
-    $allowed_ip_consumers = $config->get('allowed_ip_consumers');
+    $allowed_ip_consumers = $config->get('t_auth_provider.allowed_ip_consumers');
 
     // Determine if list of IP is a white list or black list
-    $whitelisted = $config->get('list_type');
+    $whitelisted = $config->get('t_auth_provider.list_type');
     $ip_list = array_map('trim', explode("\n", $allowed_ip_consumers));
-    $consumer_ip = $request->getClientIp(TRUE);
-    $token = $request->headers->get('x-access-token');
+    $consumer_ip = $request->getClientIp();
+    $token = explode(' ', $request->headers->get('Authorization'))[1];
+
+    \Drupal::logger('t_auth_provider')->notice(print_r(['token' => $token], true));
 
     // White list logic
     if ($whitelisted) {
       if (in_array($consumer_ip, $ip_list)) {
         $user_uuid = $this->jwtTokenService->validate_request_token($token);
+        \Drupal::logger('t_auth_provider')->notice(print_r(['user_uuid' => $user_uuid], true));
         if(!$user_uuid) {
+          throw new AccessDeniedHttpException();
           return null;
         }
         return $this->entityTypeManager->getStorage('user')->load($user_uuid);
@@ -105,6 +113,7 @@ class TAuthProvider implements AuthenticationProviderInterface {
       if (!in_array($consumer_ip, $ip_list)) {
         $user_uuid = $this->jwtTokenService->validate_request_token($token);
         if(!$user_uuid) {
+          throw new AccessDeniedHttpException();
           return null;
         }
         return $this->entityTypeManager->getStorage('user')->load($user_uuid);
