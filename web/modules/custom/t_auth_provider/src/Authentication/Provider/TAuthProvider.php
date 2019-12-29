@@ -90,18 +90,15 @@ class TAuthProvider implements AuthenticationProviderInterface {
     $consumer_ip = $request->getClientIp();
     $token = explode(' ', $request->headers->get('Authorization'))[1];
 
-    \Drupal::logger('t_auth_provider')->notice(print_r(['token' => $token], true));
-
     // White list logic
     if ($whitelisted) {
       if (in_array($consumer_ip, $ip_list)) {
-        $user_uuid = $this->jwtTokenService->validate_request_token($token);
-        \Drupal::logger('t_auth_provider')->notice(print_r(['user_uuid' => $user_uuid], true));
-        if(!$user_uuid) {
+        $user_email = $this->jwtTokenService->validate_request_token($token);
+        if(!$user_email) {
           throw new AccessDeniedHttpException();
           return null;
         }
-        return $this->entityTypeManager->getStorage('user')->load($user_uuid);
+        return user_load_by_mail($user_email);
       }
       else {
         throw new AccessDeniedHttpException();
@@ -111,12 +108,12 @@ class TAuthProvider implements AuthenticationProviderInterface {
     // Black list logic
     else {
       if (!in_array($consumer_ip, $ip_list)) {
-        $user_uuid = $this->jwtTokenService->validate_request_token($token);
-        if(!$user_uuid) {
+        $user_email = $this->jwtTokenService->validate_request_token($token);
+        if(!$user_email) {
           throw new AccessDeniedHttpException();
           return null;
         }
-        return $this->entityTypeManager->getStorage('user')->load($user_uuid);
+        return user_load_by_mail($user_email);
       }
       else {
         throw new AccessDeniedHttpException();
